@@ -65,7 +65,7 @@ CREATE TABLE likes (
     INDEX idx_user_id (user_id)
 );
 
--- Followers Table
+-- Followers Table (DEPRECATED - replaced by friend system)
 CREATE TABLE followers (
     id INT PRIMARY KEY AUTO_INCREMENT,
     follower_id INT NOT NULL,
@@ -76,6 +76,51 @@ CREATE TABLE followers (
     UNIQUE KEY unique_follow (follower_id, following_id),
     INDEX idx_follower_id (follower_id),
     INDEX idx_following_id (following_id)
+);
+
+-- Friend Requests Table
+CREATE TABLE friend_requests (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_request (sender_id, receiver_id),
+    INDEX idx_receiver_id (receiver_id),
+    INDEX idx_sender_id (sender_id),
+    INDEX idx_status (status)
+);
+
+-- Friends Table
+CREATE TABLE friends (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id_1 INT NOT NULL,
+    user_id_2 INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id_1) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id_2) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_friend (user_id_1, user_id_2),
+    INDEX idx_user_id_1 (user_id_1),
+    INDEX idx_user_id_2 (user_id_2)
+);
+
+-- Messages Table (Live Chat)
+CREATE TABLE messages (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_sender_id (sender_id),
+    INDEX idx_receiver_id (receiver_id),
+    INDEX idx_created_at (created_at),
+    INDEX idx_is_read (is_read)
 );
 
 -- Reports Table
